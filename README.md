@@ -6,6 +6,8 @@
 
 Client Laravel modular untuk Dynamic QRIS Gateway dengan DTO request/response, facade, service provider, dan konfigurasi publish. Mendukung ShopeePay, GoPay, pemilihan akun provider, idempotency, mutasi, serta long-poll pembayaran.
 
+Untuk mulai menggunakan SDK, daftar melalui [website Karuhun QRIS](https://qris.karuhundeveloper.com/) atau langsung buka [bot Telegram @karuhunqris_bot](https://t.me/karuhunqris_bot) untuk mendapatkan API key merchant. Panduan endpoint tersedia di [dokumentasi API](https://qris.karuhundeveloper.com/reference#description/introduction).
+
 ## Instalasi
 
 PHP 8.3+ dan Laravel 12 atau 13.
@@ -25,13 +27,13 @@ Service provider dan facade terdaftar lewat Laravel package discovery.
 ## Konfigurasi
 
 ```env
-DYNAMIC_QRIS_BASE_URL=http://localhost:4000
+DYNAMIC_QRIS_BASE_URL=https://qris.karuhundeveloper.com
 DYNAMIC_QRIS_API_KEY=your-merchant-api-key
 DYNAMIC_QRIS_TIMEOUT=30
 DYNAMIC_QRIS_CONNECT_TIMEOUT=10
 ```
 
-Config berada di config/dynamic-qris.php. Timeout PHP memakai detik. base_url mendukung prefix reverse proxy.
+Config berada di config/dynamic-qris.php. Base URL default adalah https://qris.karuhundeveloper.com. Timeout PHP memakai detik. base_url mendukung prefix reverse proxy.
 
 ## Quick start dengan DTO
 
