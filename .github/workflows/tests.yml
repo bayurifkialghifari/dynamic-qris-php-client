@@ -1,0 +1,41 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - php: "8.3"
+            laravel: "12"
+            testbench: "10"
+            phpunit: "11"
+          - php: "8.4"
+            laravel: "13"
+            testbench: "11"
+            phpunit: "12"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          tools: composer:v2
+          coverage: none
+      - run: composer validate --strict
+      - name: Install matrix dependencies
+        run: >-
+          composer update --prefer-dist --no-interaction
+          --with "illuminate/http:${{ matrix.laravel }}.*"
+          --with "illuminate/support:${{ matrix.laravel }}.*"
+          --with "orchestra/testbench:${{ matrix.testbench }}.*"
+          --with "phpunit/phpunit:${{ matrix.phpunit }}.*"
+      - run: composer format:check
+      - run: composer test
