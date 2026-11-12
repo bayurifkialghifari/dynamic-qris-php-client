@@ -2,31 +2,23 @@
 
 Client Laravel modular untuk Dynamic QRIS Gateway dengan DTO request/response, facade, service provider, dan konfigurasi publish. Mendukung ShopeePay, GoPay, pemilihan akun provider, idempotency, mutasi, serta long-poll pembayaran.
 
-## Persyaratan dan instalasi
+## Instalasi
 
-PHP 8.3+ dan Laravel 12 atau 13. Paket belum dipublish ke Packagist.
-
-Di composer.json aplikasi Laravel, tambahkan repository GitHub berikut:
-
-```json
-{
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/bayurifkialghifari/dynamic-qris-php-client"
-    }
-  ]
-}
-```
+PHP 8.3+ dan Laravel 12 atau 13.
 
 ```bash
-composer require bayurifkialghifari/dynamic-qris-php-client:^0.1
+composer require bayurifkialghifari/dynamic-qris-php-client
+```
+
+Perintah ini tersedia setelah paket didaftarkan di Packagist.
+
+Publish konfigurasi Laravel:
+
+```bash
 php artisan vendor:publish --tag=dynamic-qris-config
 ```
 
 Service provider dan facade terdaftar lewat Laravel package discovery.
-
-Untuk development lokal, repository Composer dapat memakai type=path, url=../dynamic-qris-php-client, serta options.versions dengan version 0.1.0.
 
 ## Konfigurasi
 
