@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Align `CreateQrisRequest` and `Qris` DTO strictly with gateway OpenAPI specification.
+- Tag and release version bump for Composer and Packagist synchronization.
+
 ## 0.2.0
 
 - Add `WebhookModule`, `WebhookPayload`, and `WebhookEvent` for verifying HMAC-SHA256 signatures (`x-karuhun-signature`), parsing typed events (`constructEvent`), and checking idempotency keys (`verifyDelivery`).
