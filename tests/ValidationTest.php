@@ -95,6 +95,31 @@ final class ValidationTest extends TestCase
         new UpdateTokenRequest('token', 'gopay:store');
     }
 
+    public function test_custom_provider_selector_is_accepted(): void
+    {
+        $request = new CreateQrisRequest(
+            amount: 1000,
+            provider: 'custom:dana-1',
+            callbackUrl: 'https://example.com/webhook',
+            products: [['name' => 'Item 1', 'price' => 1000, 'quantity' => 1]],
+            expiresInMinutes: 15,
+        );
+        $this->assertSame('custom:dana-1', $request->provider);
+        $this->assertSame('https://example.com/webhook', $request->callbackUrl);
+        $this->assertSame(15, $request->expiresInMinutes);
+
+        $array = $request->toArray();
+        $this->assertSame('custom:dana-1', $array['provider']);
+        $this->assertSame('https://example.com/webhook', $array['callback_url']);
+        $this->assertSame(15, $array['expires_in_minutes']);
+    }
+
+    public function test_invalid_callback_url_is_rejected(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        new CreateQrisRequest(1000, callbackUrl: 'not-a-valid-url');
+    }
+
     public function test_private_endpoints_require_an_api_key(): void
     {
         Http::fake();

@@ -12,6 +12,7 @@ use Bayurifkialghifari\DynamicQris\Modules\QrisModule;
 use Bayurifkialghifari\DynamicQris\Modules\SystemModule;
 use Bayurifkialghifari\DynamicQris\Modules\TokenModule;
 use Bayurifkialghifari\DynamicQris\Modules\TransactionsModule;
+use Bayurifkialghifari\DynamicQris\Modules\WebhookModule;
 use Bayurifkialghifari\DynamicQris\Support\Validation;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
@@ -31,6 +32,8 @@ final class DynamicQrisClient
     public readonly TokenModule $token;
 
     public readonly SystemModule $system;
+
+    public readonly WebhookModule $webhook;
 
     private readonly string $baseUrl;
 
@@ -54,6 +57,7 @@ final class DynamicQrisClient
         $this->transactions = new TransactionsModule($this);
         $this->token = new TokenModule($this);
         $this->system = new SystemModule($this);
+        $this->webhook = new WebhookModule;
     }
 
     public function account(): AccountModule
@@ -84,6 +88,11 @@ final class DynamicQrisClient
     public function system(): SystemModule
     {
         return $this->system;
+    }
+
+    public function webhook(): WebhookModule
+    {
+        return $this->webhook;
     }
 
     public function url(string $path): string

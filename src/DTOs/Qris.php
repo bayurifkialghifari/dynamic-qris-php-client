@@ -36,6 +36,16 @@ final readonly class Qris extends ResponseData
 
     public string $providerSelector;
 
+    public ?string $callbackUrl;
+
+    public ?string $paymentUrl;
+
+    public ?string $qrImageUrl;
+
+    public ?string $merchantName;
+
+    public ?int $totalAmount;
+
     public function __construct(array $data)
     {
         parent::__construct($data);
@@ -54,6 +64,11 @@ final readonly class Qris extends ResponseData
         $this->provider = (string) ($data['provider'] ?? '');
         $this->label = (string) ($data['label'] ?? '');
         $this->providerSelector = (string) ($data['provider_selector'] ?? '');
+        $this->callbackUrl = isset($data['callback_url']) ? (string) $data['callback_url'] : (isset($data['callbackUrl']) ? (string) $data['callbackUrl'] : null);
+        $this->paymentUrl = isset($data['payment_url']) ? (string) $data['payment_url'] : (isset($data['paymentUrl']) ? (string) $data['paymentUrl'] : null);
+        $this->qrImageUrl = isset($data['qr_image_url']) ? (string) $data['qr_image_url'] : (isset($data['qrImageUrl']) ? (string) $data['qrImageUrl'] : null);
+        $this->merchantName = isset($data['merchant_name']) ? (string) $data['merchant_name'] : (isset($data['merchantName']) ? (string) $data['merchantName'] : null);
+        $this->totalAmount = isset($data['total_amount']) ? (int) $data['total_amount'] : (isset($data['totalAmount']) ? (int) $data['totalAmount'] : null);
     }
 
     public static function fromArray(array $data): self

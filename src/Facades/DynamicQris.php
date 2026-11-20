@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Bayurifkialghifari\DynamicQris\Modules\TransactionsModule transactions()
  * @method static \Bayurifkialghifari\DynamicQris\Modules\TokenModule token()
  * @method static \Bayurifkialghifari\DynamicQris\Modules\SystemModule system()
+ * @method static \Bayurifkialghifari\DynamicQris\Modules\WebhookModule webhook()
  *
  * @see DynamicQrisClient
  */

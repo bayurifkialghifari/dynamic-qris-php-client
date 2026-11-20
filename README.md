@@ -103,8 +103,61 @@ Modul dapat diakses lewat method ($client->qris()) atau properti ($client->qris)
 | system()->health(options?) | Health, public |
 | system()->ready(options?) | Readiness, public |
 | system()->logs(options?) | Array log, perlu API key |
+| webhook()->verifySignature(payload, sig, sec) | bool validasi HMAC-SHA256 signature |
+| webhook()->constructEvent(payload, sig, sec, delId?) | WebhookEvent ber-type dengan WebhookPayload |
+| webhook()->verifyDelivery(delId, seenDeliveries) | bool cek idempotency x-karuhun-delivery |
 
 Properti DTO menggunakan camelCase (qrisUrl, requestedAmount, providerSelector, totalAmount). Semua response DTO menyimpan raw serta menyediakan toArray() / JSON serialization untuk mengembalikan kontrak API asli. Metadata paid/status dan total_amount tetap tersimpan pada response yang relevan.
+
+## Webhooks
+
+Gateway otomatis mengirim HTTP POST `payment.success` ke `callback_url` pesanan atau Webhook URL default di CMS saat pembayaran lunas. Verifikasi signature dan idempotency key di controller Laravel:
+
+```php
+namespace App\Http\Controllers;
+
+use Bayurifkialghifari\DynamicQris\Facades\DynamicQris;
+use Bayurifkialghifari\DynamicQris\Exceptions\DynamicQrisException;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+
+final class QrisWebhookController extends Controller
+{
+    public function handle(Request $request)
+    {
+        $signature = $request->header('x-karuhun-signature', '');
+        $deliveryId = $request->header('x-karuhun-delivery', '');
+        $secret = config('services.dynamic_qris.webhook_secret');
+
+        try {
+            // 1. Verifikasi tanda tangan HMAC-SHA256 & parse event DTO
+            $event = DynamicQris::webhook()->constructEvent(
+                payload: $request->getContent(),
+                signature: $signature,
+                secret: $secret,
+                deliveryId: $deliveryId,
+            );
+
+            // 2. Cegah double-order fulfillment via deliveryId (idempotency)
+            $isFresh = DynamicQris::webhook()->verifyDelivery($deliveryId, function (string $id) {
+                return ! Cache::add("qris_delivery:{$id}", true, now()->addHours(24));
+            });
+            if (! $isFresh) {
+                return response()->json(['received' => true, 'duplicate' => true]);
+            }
+
+            // 3. Proses pesanan
+            $payload = $event->payload;
+            // $payload->token, $payload->totalAmount, $payload->paidAt
+            Order::where('qris_token', $payload->token)->update(['status' => 'paid']);
+
+            return response()->json(['success' => true]);
+        } catch (DynamicQrisException $e) {
+            return response()->json(['error' => $e->getMessage()], 401);
+        }
+    }
+}
+```
 
 ## Long polling
 

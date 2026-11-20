@@ -27,11 +27,21 @@ final class Validation
         if ($value === null) {
             return;
         }
-        if (! is_string($value) || ! preg_match('/^(shopee|gopay)(:[a-z0-9_-]{1,64})?$/D', $value)) {
-            throw new InvalidArgumentException('provider must be shopee, gopay, or kind:label');
+        if (! is_string($value) || ! preg_match('/^(shopee|gopay|custom)(:[a-z0-9_-]{1,64})?$/D', $value)) {
+            throw new InvalidArgumentException('provider must be shopee, gopay, custom, or kind:label');
         }
         if ($shopeeOnly && ! str_starts_with($value, 'shopee')) {
             throw new InvalidArgumentException('Token updates only support ShopeePay');
+        }
+    }
+
+    public static function url(mixed $value, string $name): void
+    {
+        if ($value === null) {
+            return;
+        }
+        if (! is_string($value) || ! filter_var($value, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $value)) {
+            throw new InvalidArgumentException("{$name} must be a valid HTTP(S) URL");
         }
     }
 }
