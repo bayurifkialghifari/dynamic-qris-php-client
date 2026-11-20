@@ -100,18 +100,18 @@ final class ValidationTest extends TestCase
         $request = new CreateQrisRequest(
             amount: 1000,
             provider: 'custom:dana-1',
+            description: 'Order #123',
+            products: [['name' => 'Item 1', 'price' => 1000, 'qty' => 1]],
             callbackUrl: 'https://example.com/webhook',
-            products: [['name' => 'Item 1', 'price' => 1000, 'quantity' => 1]],
-            expiresInMinutes: 15,
         );
         $this->assertSame('custom:dana-1', $request->provider);
+        $this->assertSame('Order #123', $request->description);
         $this->assertSame('https://example.com/webhook', $request->callbackUrl);
-        $this->assertSame(15, $request->expiresInMinutes);
 
         $array = $request->toArray();
         $this->assertSame('custom:dana-1', $array['provider']);
+        $this->assertSame('Order #123', $array['description']);
         $this->assertSame('https://example.com/webhook', $array['callback_url']);
-        $this->assertSame(15, $array['expires_in_minutes']);
     }
 
     public function test_invalid_callback_url_is_rejected(): void
