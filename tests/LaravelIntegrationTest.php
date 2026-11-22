@@ -7,6 +7,7 @@ namespace Bayurifkialghifari\DynamicQris\Tests;
 use Bayurifkialghifari\DynamicQris\DynamicQrisClient;
 use Bayurifkialghifari\DynamicQris\DynamicQrisServiceProvider;
 use Bayurifkialghifari\DynamicQris\Facades\DynamicQris;
+use Bayurifkialghifari\DynamicQris\Modules\TransactionModule;
 
 final class LaravelIntegrationTest extends TestCase
 {
@@ -16,6 +17,7 @@ final class LaravelIntegrationTest extends TestCase
         $this->assertSame($this->client(), $this->app->make('dynamic-qris'));
         $this->assertSame($this->client(), DynamicQris::getFacadeRoot());
         $this->assertSame(10000, DynamicQris::account()->get()->balance);
+        $this->assertInstanceOf(TransactionModule::class, DynamicQris::transaction());
         $this->assertSame(10, config('dynamic-qris.connect_timeout'));
         $this->assertSame($this->client(), $this->app->make(DynamicQrisClient::class));
     }

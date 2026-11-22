@@ -27,8 +27,8 @@ final class Validation
         if ($value === null) {
             return;
         }
-        if (! is_string($value) || ! preg_match('/^(shopee|gopay|custom)(:[a-z0-9_-]{1,64})?$/D', $value)) {
-            throw new InvalidArgumentException('provider must be shopee, gopay, custom, or kind:label');
+        if (! is_string($value) || ! preg_match('/^(shopee|gopay|custom|bank_transfer)(:[a-z0-9_-]{1,64})?$/D', $value)) {
+            throw new InvalidArgumentException('provider must be shopee, gopay, custom, bank_transfer, or kind:label');
         }
         if ($shopeeOnly && ! str_starts_with($value, 'shopee')) {
             throw new InvalidArgumentException('Token updates only support ShopeePay');

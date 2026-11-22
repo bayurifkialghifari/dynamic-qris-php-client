@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Bayurifkialghifari\DynamicQris\Modules;
 
+use Bayurifkialghifari\DynamicQris\DTOs\CreatedTransaction;
+use Bayurifkialghifari\DynamicQris\DTOs\CreateQrisRequest;
+use Bayurifkialghifari\DynamicQris\DTOs\CreateTransactionRequest;
 use Bayurifkialghifari\DynamicQris\DTOs\RequestOptions;
 use Bayurifkialghifari\DynamicQris\DTOs\TransactionsQuery;
 use Bayurifkialghifari\DynamicQris\DTOs\TransactionsResult;
@@ -13,6 +16,11 @@ use Bayurifkialghifari\DynamicQris\Support\Validation;
 final class TransactionsModule
 {
     public function __construct(private readonly DynamicQrisClient $client) {}
+
+    public function create(CreateTransactionRequest|CreateQrisRequest|array $request, ?RequestOptions $options = null): CreatedTransaction
+    {
+        return $this->client->transaction()->create($request, $options);
+    }
 
     public function list(TransactionsQuery|array $query = [], ?RequestOptions $options = null): TransactionsResult
     {

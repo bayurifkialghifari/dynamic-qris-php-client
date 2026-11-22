@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Add `POST /v1/transaction` support via `TransactionModule` (`$client->transaction->create()`, `$client->transactions->create()`, and `DynamicQris::transaction()->create()`).
+- Add `CreateTransactionRequest` and `CreatedTransaction` DTOs with support for QRIS and Bank Transfer payments (including bank account fields: `bankName`, `bankLogo`, `accountNumber`, `accountHolderName`, and `paymentType`).
+- Support `bank_transfer` provider type (e.g. `bank_transfer:bca-utama`) in provider validation.
+- Deprecate `POST /v1/qris/create` (`QrisModule::create()`) as legacy with runtime deprecation notice and `@deprecated` annotation while maintaining full backward compatibility.
+- Update documentation and examples to use `transaction()->create()`.
+
 ## 0.2.1
 
 - Align `CreateQrisRequest` and `Qris` DTO strictly with gateway OpenAPI specification.

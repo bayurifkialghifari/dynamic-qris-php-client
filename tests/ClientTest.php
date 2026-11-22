@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Bayurifkialghifari\DynamicQris\Tests;
 
 use Bayurifkialghifari\DynamicQris\DTOs\CheckPaymentRequest;
+use Bayurifkialghifari\DynamicQris\DTOs\CreatedTransaction;
 use Bayurifkialghifari\DynamicQris\DTOs\CreateQrisRequest;
+use Bayurifkialghifari\DynamicQris\DTOs\CreateTransactionRequest;
 use Bayurifkialghifari\DynamicQris\DTOs\RequestOptions;
 use Bayurifkialghifari\DynamicQris\DTOs\TransactionsQuery;
 use Bayurifkialghifari\DynamicQris\DTOs\UpdateTokenRequest;
@@ -249,5 +251,148 @@ final class ClientTest extends TestCase
             return Http::response($this->fixture['pending']);
         });
         $this->client()->payment()->check(['token' => 'qr_example', 'wait' => true], new RequestOptions(timeout: 5));
+    }
+
+    public function test_transaction_create_supports_qris(): void
+    {
+        $payload = [
+            'success' => true,
+            'data' => [
+                'id' => 'tx_qris_123',
+                'token' => 'tok_qris_123',
+                'payment_type' => 'qris',
+                'payment_link' => 'https://gateway.example/pay/tx_qris_123',
+                'callback_url' => 'https://my-store.example/webhook',
+                'description' => 'Order #INV-100',
+                'products' => [['name' => 'Item 1', 'price' => 10000, 'qty' => 1]],
+                'qris_url' => 'https://gateway.example/qr/tx_qris_123',
+                'qris_string' => '0002010102126304A13F',
+                'bank_name' => null,
+                'bank_logo' => null,
+                'account_number' => null,
+                'account_holder_name' => null,
+                'amount' => 10001,
+                'requested_amount' => 10000,
+                'unique_code' => 1,
+                'creation_fee' => 100,
+                'balance_remaining' => 149900,
+                'expires_at' => '2026-10-19T03:30:30.000Z',
+                'expires_in_seconds' => 900,
+                'idempotent_replay' => false,
+                'provider' => 'gopay',
+                'label' => 'default',
+                'provider_selector' => 'gopay:default',
+            ],
+        ];
+        Http::fake(fn () => Http::response($payload, 201));
+
+        $tx = $this->client()->transaction()->create(
+            new CreateTransactionRequest(10000, 'gopay:default', 'Order #INV-100', [['name' => 'Item 1', 'price' => 10000, 'qty' => 1]], 'https://my-store.example/webhook'),
+            new RequestOptions(idempotencyKey: 'tx-key-1'),
+        );
+
+        $this->assertInstanceOf(CreatedTransaction::class, $tx);
+        $this->assertSame('tx_qris_123', $tx->id);
+        $this->assertSame('qris', $tx->paymentType);
+        $this->assertSame('https://gateway.example/qr/tx_qris_123', $tx->qrisUrl);
+        $this->assertSame(10001, $tx->amount);
+        $this->assertNull($tx->bankName);
+
+        Http::assertSent(fn (Request $request) => $request->url() === 'https://gateway.example/proxy/v1/transaction'
+            && $request->method() === 'POST'
+            && $request->hasHeader('Idempotency-Key', 'tx-key-1')
+            && $request['amount'] === 10000
+            && $request['provider'] === 'gopay:default');
+    }
+
+    public function test_transaction_create_supports_bank_transfer(): void
+    {
+        $payload = [
+            'success' => true,
+            'data' => [
+                'id' => 'tx_bt_456',
+                'token' => 'tok_bt_456',
+                'payment_type' => 'bank_transfer',
+                'payment_link' => 'https://gateway.example/pay/tx_bt_456',
+                'callback_url' => 'https://my-store.example/webhook',
+                'description' => 'Order #INV-200',
+                'products' => null,
+                'qris_url' => null,
+                'qris_string' => null,
+                'bank_name' => 'BCA',
+                'bank_logo' => 'https://gateway.example/images/bca.svg',
+                'account_number' => '1234567890',
+                'account_holder_name' => 'PT MAKMUR JAYA',
+                'amount' => 50001,
+                'requested_amount' => 50000,
+                'unique_code' => 1,
+                'creation_fee' => 100,
+                'balance_remaining' => 149900,
+                'expires_at' => '2026-10-19T03:30:30.000Z',
+                'expires_in_seconds' => 900,
+                'idempotent_replay' => false,
+                'provider' => 'bank_transfer',
+                'label' => 'bca-utama',
+                'provider_selector' => 'bank_transfer:bca-utama',
+            ],
+        ];
+        Http::fake(fn () => Http::response($payload, 201));
+
+        $tx = $this->client()->transaction->create([
+            'amount' => 50000,
+            'provider' => 'bank_transfer:bca-utama',
+        ]);
+
+        $this->assertSame('bank_transfer', $tx->paymentType);
+        $this->assertNull($tx->qrisUrl);
+        $this->assertNull($tx->qrisString);
+        $this->assertSame('BCA', $tx->bankName);
+        $this->assertSame('1234567890', $tx->accountNumber);
+        $this->assertSame('PT MAKMUR JAYA', $tx->accountHolderName);
+    }
+
+    public function test_transactions_create_alias_works(): void
+    {
+        $payload = [
+            'success' => true,
+            'data' => [
+                'id' => 'tx_alias_789',
+                'token' => 'tok_alias_789',
+                'payment_type' => 'qris',
+                'payment_link' => null,
+                'callback_url' => null,
+                'description' => null,
+                'products' => null,
+                'qris_url' => 'https://gateway.example/qr/tx_alias',
+                'qris_string' => '00020101',
+                'bank_name' => null,
+                'bank_logo' => null,
+                'account_number' => null,
+                'account_holder_name' => null,
+                'amount' => 10001,
+                'requested_amount' => 10000,
+                'unique_code' => 1,
+                'creation_fee' => 100,
+                'balance_remaining' => 9900,
+                'expires_at' => '2026-10-19T03:30:30.000Z',
+                'expires_in_seconds' => 900,
+                'idempotent_replay' => false,
+                'provider' => 'gopay',
+                'label' => 'default',
+                'provider_selector' => 'gopay:default',
+            ],
+        ];
+        Http::fake(fn () => Http::response($payload, 201));
+
+        $tx = $this->client()->transactions()->create(['amount' => 10000]);
+        $this->assertSame('tx_alias_789', $tx->id);
+    }
+
+    public function test_legacy_qris_create_still_functions(): void
+    {
+        $this->fake('qris', 201);
+        $qris = $this->client()->qris()->create(['amount' => 10000]);
+        $this->assertSame('qr_example', $qris->token);
+        Http::assertSent(fn (Request $request) => $request->url() === 'https://gateway.example/proxy/v1/qris/create');
     }
 }

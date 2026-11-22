@@ -14,8 +14,13 @@ final class QrisModule
 {
     public function __construct(private readonly DynamicQrisClient $client) {}
 
+    /**
+     * @deprecated Use TransactionModule::create() (/v1/transaction) instead. /v1/qris/create is legacy.
+     */
     public function create(CreateQrisRequest|array $request, ?RequestOptions $options = null): Qris
     {
+        @trigger_error('QrisModule::create() is legacy and deprecated. Use TransactionModule::create() (/v1/transaction) instead.', E_USER_DEPRECATED);
+
         $request = is_array($request) ? CreateQrisRequest::fromArray($request) : $request;
 
         return Qris::fromArray($this->client->request('POST', '/v1/qris/create', $request->toArray(), $options));

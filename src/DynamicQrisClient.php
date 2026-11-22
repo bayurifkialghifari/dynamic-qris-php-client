@@ -11,6 +11,7 @@ use Bayurifkialghifari\DynamicQris\Modules\PaymentModule;
 use Bayurifkialghifari\DynamicQris\Modules\QrisModule;
 use Bayurifkialghifari\DynamicQris\Modules\SystemModule;
 use Bayurifkialghifari\DynamicQris\Modules\TokenModule;
+use Bayurifkialghifari\DynamicQris\Modules\TransactionModule;
 use Bayurifkialghifari\DynamicQris\Modules\TransactionsModule;
 use Bayurifkialghifari\DynamicQris\Modules\WebhookModule;
 use Bayurifkialghifari\DynamicQris\Support\Validation;
@@ -22,6 +23,8 @@ use JsonException;
 final class DynamicQrisClient
 {
     public readonly AccountModule $account;
+
+    public readonly TransactionModule $transaction;
 
     public readonly QrisModule $qris;
 
@@ -52,6 +55,7 @@ final class DynamicQrisClient
         Validation::integer($connectTimeout, 'connectTimeout');
         $this->baseUrl = rtrim($baseUrl, '/');
         $this->account = new AccountModule($this);
+        $this->transaction = new TransactionModule($this);
         $this->qris = new QrisModule($this);
         $this->payment = new PaymentModule($this);
         $this->transactions = new TransactionsModule($this);
@@ -63,6 +67,11 @@ final class DynamicQrisClient
     public function account(): AccountModule
     {
         return $this->account;
+    }
+
+    public function transaction(): TransactionModule
+    {
+        return $this->transaction;
     }
 
     public function qris(): QrisModule

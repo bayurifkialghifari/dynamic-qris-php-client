@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static \Bayurifkialghifari\DynamicQris\Modules\AccountModule account()
+ * @method static \Bayurifkialghifari\DynamicQris\Modules\TransactionModule transaction()
  * @method static \Bayurifkialghifari\DynamicQris\Modules\QrisModule qris()
  * @method static \Bayurifkialghifari\DynamicQris\Modules\PaymentModule payment()
  * @method static \Bayurifkialghifari\DynamicQris\Modules\TransactionsModule transactions()

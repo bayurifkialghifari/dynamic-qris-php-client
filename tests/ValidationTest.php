@@ -6,6 +6,7 @@ namespace Bayurifkialghifari\DynamicQris\Tests;
 
 use Bayurifkialghifari\DynamicQris\DTOs\CheckPaymentRequest;
 use Bayurifkialghifari\DynamicQris\DTOs\CreateQrisRequest;
+use Bayurifkialghifari\DynamicQris\DTOs\CreateTransactionRequest;
 use Bayurifkialghifari\DynamicQris\DTOs\RequestOptions;
 use Bayurifkialghifari\DynamicQris\DTOs\TransactionsQuery;
 use Bayurifkialghifari\DynamicQris\DTOs\UpdateTokenRequest;
@@ -43,6 +44,18 @@ final class ValidationTest extends TestCase
     public static function invalidSelectors(): array
     {
         return [['other'], ['shopee:'], ['gopay:Invalid'], ['shopee:a:b']];
+    }
+
+    public function test_bank_transfer_provider_selector_is_accepted(): void
+    {
+        $req1 = new CreateTransactionRequest(1000, 'bank_transfer');
+        $this->assertSame('bank_transfer', $req1->provider);
+
+        $req2 = new CreateTransactionRequest(1000, 'bank_transfer:bca-utama');
+        $this->assertSame('bank_transfer:bca-utama', $req2->provider);
+
+        $legacyReq = new CreateQrisRequest(1000, 'bank_transfer:bca-utama');
+        $this->assertSame('bank_transfer:bca-utama', $legacyReq->provider);
     }
 
     #[DataProvider('invalidKeys')]

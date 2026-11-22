@@ -38,7 +38,7 @@ Config berada di config/dynamic-qris.php. Base URL default adalah https://qris.k
 ## Quick start dengan DTO
 
 ```php
-use Bayurifkialghifari\DynamicQris\DTOs\CreateQrisRequest;
+use Bayurifkialghifari\DynamicQris\DTOs\CreateTransactionRequest;
 use Bayurifkialghifari\DynamicQris\DTOs\CheckPaymentRequest;
 use Bayurifkialghifari\DynamicQris\DTOs\RequestOptions;
 use Bayurifkialghifari\DynamicQris\Facades\DynamicQris;
@@ -46,14 +46,14 @@ use Bayurifkialghifari\DynamicQris\Facades\DynamicQris;
 $account = DynamicQris::account()->get();
 echo $account->balance;
 
-$qr = DynamicQris::qris()->create(
-    new CreateQrisRequest(amount: 10000, provider: 'shopee:store'),
+$tx = DynamicQris::transaction()->create(
+    new CreateTransactionRequest(amount: 10000, provider: 'shopee:store'),
     new RequestOptions(idempotencyKey: 'order-123'),
 );
-echo $qr->qrisUrl;
-echo $qr->amount; // Nominal yang harus dibayar, termasuk kode unik.
+echo $tx->qrisUrl;
+echo $tx->amount; // Nominal yang harus dibayar, termasuk kode unik.
 
-$result = DynamicQris::payment()->check(new CheckPaymentRequest(token: $qr->token));
+$result = DynamicQris::payment()->check(new CheckPaymentRequest(token: $tx->token));
 if ($result->paid) {
     echo $result->transaction->transactionId;
 }
@@ -62,7 +62,7 @@ if ($result->paid) {
 Array request juga didukung. Field array mengikuti kontrak API:
 
 ```php
-$qr = DynamicQris::qris()->create(
+$tx = DynamicQris::transaction()->create(
     ['amount' => 10000, 'provider' => 'gopay:store'],
     new RequestOptions(idempotencyKey: 'order-456'),
 );
@@ -91,7 +91,8 @@ Modul dapat diakses lewat method ($client->qris()) atau properti ($client->qris)
 | Method | DTO / hasil |
 | --- | --- |
 | account()->get(options?) | Account dengan ProviderAccount[] |
-| qris()->create(request, options?) | Qris |
+| transaction()->create(request, options?) | CreatedTransaction (QRIS / Bank Transfer) |
+| qris()->create(request, options?) | Qris (Legacy / Deprecated) |
 | qris()->url(id) | URL gambar, tanpa HTTP request |
 | qris()->raw(id, options?) | String payload QRIS |
 | qris()->image(id, options?) | String bytes PNG |
@@ -207,7 +208,7 @@ Simpan token dan idempotency key bersama pesanan. Request ulang dengan key serta
 use Bayurifkialghifari\DynamicQris\Exceptions\DynamicQrisException;
 
 try {
-    DynamicQris::qris()->create(['amount' => 10000], new RequestOptions(idempotencyKey: 'order-789'));
+    DynamicQris::transaction()->create(['amount' => 10000], new RequestOptions(idempotencyKey: 'order-789'));
 } catch (DynamicQrisException $error) {
     if ($error->status === 402) {
         // Tawarkan isi saldo merchant melalui bot gateway.
